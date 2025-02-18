@@ -1,0 +1,12 @@
+:root {
+    --main-bg-color: lightgray;
+    --main-text-color: black;
+    --button-bg-color: green;
+    --button-text-color: white;
+    --button-hover-bg-color: darkgreen;
+    --question-bg-color: white;
+    --question-text-color: black;
+    --question-list-button-color: lightgray;
+    --question-list-button-hover-color: rgb(66, 66, 66);
+    --question-list-active-button-color: rgb(92, 92, 92);
+}

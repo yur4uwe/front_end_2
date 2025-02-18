@@ -8,6 +8,7 @@ import (
 
 type Question struct {
 	Question string   `json:"question"`
+	SVG      string   `json:"svg"`
 	Options  []string `json:"options"`
 	Answer   string   `json:"answer"`
 }
@@ -15,6 +16,7 @@ type Question struct {
 type AnswerLessQuestion struct {
 	Question string   `json:"question"`
 	Options  []string `json:"options"`
+	SVG      string   `json:"svg"`
 }
 
 // Function to convert Question to AnswerLessQuestion
@@ -22,6 +24,7 @@ func ToAnswerLessQuestion(q Question) AnswerLessQuestion {
 	return AnswerLessQuestion{
 		Question: q.Question,
 		Options:  q.Options,
+		SVG:      q.SVG,
 	}
 }
 

@@ -6,14 +6,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (path === "/login") {
             const loginElement = document.createElement("login-element");
-            loginElement.setAttribute("redirect-url", "/home");
+            loginElement.setAttribute("redirect-url", "/login");
             main.appendChild(loginElement);
-        } else if (path === "/register") {
-            const registerElement = document.createElement("register-element");
-            main.appendChild(registerElement);
-        } else if (path === "/questions") {
-            const questionList = document.createElement("question-list");
-            main.appendChild(questionList);
+        } else if (path === "/test") {
+            const testElement = document.createElement("test-element");
+            main.appendChild(testElement);
         } else {
             const homeElement = document.createElement("home-element");
             main.appendChild(homeElement);

@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
+	"fr_lab_2/pkg/test"
 	"fr_lab_2/pkg/users"
 	"net/http"
 	"strconv"
@@ -72,7 +74,16 @@ func Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func Test(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, "/test", http.StatusFound)
+	questions, err := test.GetTestDataForUser()
+	if err != nil {
+		fmt.Println("Error getting test data")
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(jsonMessageProducer("error", "Error getting test data"))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(questions)
 }
 
 func SubmitTest(w http.ResponseWriter, r *http.Request) {

@@ -1,25 +1,7 @@
-async function submitFormData(event) {
-    console.log("Form data submitted");
-    event.preventDefault();
+/**
+ * @typedef {{question: string, svg: string, options: Array<string>}} Questions
+ */
 
-    try {
-        const formData = new FormData(event.target);
-        const response = await fetch(event.target.action, {
-            method: event.target.method,
-            body: formData,
-        });
-        const data = await response.json();
-        console.log(data);
-
-        if (response.ok) {
-            console.log("Login successful, redirecting to test page: ",
-                event.target.getRootNode().host.redirectUrl);
-            navigateTo("/test");
-        }
-    } catch (error) {
-        console.error(error);
-    }
-}
 
 
 function navigateTo(path) {
@@ -27,98 +9,6 @@ function navigateTo(path) {
     window.dispatchEvent(new Event("popstate"));
 }
 
-class Question extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: "open" });
-        this.shadowRoot.innerHTML = `
-            <style>
-                h1 {
-                    color: red;
-                }
-            </style>
-            <h1>Hello World</h1>
-            <slot></slot> <!-- Define a slot for children -->
-        `;
-    }
-}
-
-class Login extends HTMLElement {
-    static get observedAttributes() {
-        return ['redirect-url'];
-    }
-
-    constructor() {
-        super();
-        this.attachShadow({ mode: "open" });
-        this.shadowRoot.innerHTML = `
-            <style>
-                :host {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    flex-direction: column;
-                    width: 100%;
-                    padding: 10px;
-                    background-color: lightgray;
-                    border-radius: 5px;
-                    margin: 10px;
-                }
-
-                input {
-                    padding: 10px;
-                    margin: 10px;
-                }
-                
-                input[type="submit"] {
-                    background-color: green;
-                    color: white;
-                    border: none;
-                    cursor: pointer;
-                    border-radius: 5px;
-                }
-
-                input[type="submit"]:hover {
-                    background-color: darkgreen;
-                }
-            </style>
-            <h1>Login Page</h1>
-
-            <form id="loginForm" action="/login" method="POST">
-                <input type="text" name="username" placeholder="Username" required />
-                <input type="submit" value="Login" />
-            </form>
-            `;
-        this.shadowRoot.getElementById("loginForm").addEventListener("submit", submitFormData);
-    }
-
-    /**
-     * @param {string} name - Name of the attribute
-     * @param {string} oldValue - Old value of the attribute
-     * @param {string} newValue - New value of the attribute
-     */
-    attributeChangedCallback(name, oldValue, newValue) {
-        if (name === 'redirect-url') {
-            this.redirectUrl = newValue;
-        }
-    }
-}
-
-class QuestionList extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: "open" });
-        this.shadowRoot.innerHTML = `
-            <style>
-                h1 {
-                    color: blue;
-                }
-            </style>
-            <h1>Question List</h1>
-            <slot></slot> <!-- Define a slot for children -->
-        `;
-    }
-}
 
 class Home extends HTMLElement {
     constructor() {
@@ -127,7 +17,7 @@ class Home extends HTMLElement {
         this.shadowRoot.innerHTML = `
             <style>
                 h1 {
-                    color: green;
+                    color: var(--main-text-color);
                 }
             </style>
             <h1>Home Page</h1>
@@ -146,7 +36,121 @@ class Home extends HTMLElement {
     }
 }
 
+class Question extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: "open" });
+        this.shadowRoot.innerHTML = `
+            <style>
+                h1 {
+                    color: var(--main-text-color);
+                }
+            </style>
+            <slot></slot> <!-- Define a slot for children -->
+        `;
+    }
+}
+
+/**
+ * @param {string[]} options - Options for the question
+ * @returns {string} HTML string of the options
+ */
+function parseQuestionOptions(options) {
+    return options.map((option, index) => `<input type="radio" name="option" value="${index}">${option}<br>`).join("");
+}
+
+class Test extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: "open" });
+        /**
+         * @type {Array<Questions>} - Get the test data from local storage
+         */
+        const test = JSON.parse(localStorage.getItem("testData"));
+        console.log(test);
+
+        this.shadowRoot.innerHTML = `
+            <style>
+                :host {
+                    display: flex;
+                    align-items: center;
+                    flex-direction: column;
+                }
+                h1 {
+                    color: var(--main-text-color);
+                }
+            </style>
+            <h1>Test Page</h1>
+            <question-list questions="${test.length}"></question-list>
+            <div id="testContainer"></div>
+            <slot></slot> <!-- Define a slot for children -->
+        `;
+
+        this.currentIndex = 0;
+        const question = test[this.currentIndex];
+        this.renderQuestion(this.currentIndex, question, test.length);
+
+        // Listen for the custom event to change the question
+        this.shadowRoot.querySelector("question-list").addEventListener("questionSelected", (event) => {
+            const index = event.detail.index;
+            const move = event.detail.move;
+
+            if (index !== -1) {
+                this.changeQuestion(index);
+            }
+
+            if (move !== 0) {
+                this.changeQuestion(this.currentIndex + move);
+            }
+        });
+    }
+
+    /**
+     * @param {number} index 
+     */
+    changeQuestion(index) {
+        const test = JSON.parse(localStorage.getItem("testData"));
+
+        if (index < 0) {
+            index = test.length - 1;
+        } else if (index >= test.length) {
+            index = 0;
+        }
+
+        const question = test[index];
+        this.currentIndex = index;
+        this.renderQuestion(index, question, test.length);
+    }
+
+    /**
+     * @param {number} index 
+     * @param {Questions} question 
+     * @param {number} questionLength
+     */
+    renderQuestion(index, question, questionLength) {
+        const testContainer = this.shadowRoot.getElementById("testContainer");
+        testContainer.innerHTML = "";
+
+        const questionElement = document.createElement("question-element");
+
+        questionElement.innerHTML = `<div id="question">${question.question}</div>
+            ${question.svg}
+            <div id="options">${parseQuestionOptions(question.options)}</div>`;
+
+        testContainer.appendChild(questionElement);
+
+        // Add event listener to save selected value to localStorage
+        this.shadowRoot.querySelectorAll('input[name="option"]').forEach((input) => {
+            input.addEventListener('change', (event) => {
+                const selectedValue = event.target.value;
+                const answers = JSON.parse(localStorage.getItem("answers")) || Array(questionLength).fill(null);
+                answers[index] = selectedValue; // Save the answer for the current question
+                localStorage.setItem("answers", JSON.stringify(answers));
+            });
+        });
+    }
+}
+
 customElements.define("question-element", Question);
-customElements.define("login-element", Login);
-customElements.define("question-list", QuestionList);
 customElements.define("home-element", Home);
+customElements.define("test-element", Test);

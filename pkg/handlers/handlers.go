@@ -1,9 +1,17 @@
 package handlers
 
 import (
+	"fmt"
+	"fr_lab_2/pkg/users"
 	"net/http"
+	"strconv"
 	"strings"
+	"time"
 )
+
+func jsonMessageProducer(message_type string, message string) []byte {
+	return []byte(fmt.Sprintf(`{"%s": "%s"}`, message_type, message))
+}
 
 func Home(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "../static/index.html")
@@ -30,21 +38,84 @@ func NotFound(w http.ResponseWriter, r *http.Request) {
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Login reached")
+
+	if r.Method != "POST" {
+		fmt.Println("Method not allowed")
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		w.Write(jsonMessageProducer("error", "Method not allowed"))
+		return
+	}
+
+	username := r.FormValue("username")
+
+	if username == "" {
+		fmt.Println("Username not provided")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(jsonMessageProducer("error", "Username not provided"))
+		return
+	}
+
+	new_user := users.NewUser(username)
+	fmt.Println("New user created:", new_user)
+
+	err := users.SaveUser(new_user)
+	if err != nil {
+		fmt.Println("Error saving user:", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(jsonMessageProducer("error", "Error saving user"))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonMessageProducer("success", "Welcome "+username))
+}
+
+func Test(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, "/test", http.StatusFound)
+}
+
+func SubmitTest(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
-		w.Write([]byte("{Method not allowed}"))
+		w.Write(jsonMessageProducer("error", "Method not allowed"))
 		return
 	}
 
 	r.ParseForm()
 	username := r.FormValue("username")
-
-	if username == "" {
+	score, err := strconv.Atoi(r.FormValue("score"))
+	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("{Username not provided}"))
+		w.Write(jsonMessageProducer("error", "Impossible to parse score"))
+		return
+	}
+	time, err := time.Parse(time.RFC3339, r.FormValue("time"))
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(jsonMessageProducer("error", "Impossible to parse time"))
+		return
+	}
+
+	if username == "" || score == -1 || time.IsZero() {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(jsonMessageProducer("error", "Missing fields"))
+		return
+	}
+
+	user := users.User{
+		Username: username,
+		Score:    score,
+		Time:     time,
+	}
+
+	err = users.SaveUser(user)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(jsonMessageProducer("error", "Error saving user"))
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("{Welcome " + username + "}"))
+	w.Write(jsonMessageProducer("success", "Test submitted"))
 }

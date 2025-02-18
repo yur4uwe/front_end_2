@@ -5,18 +5,16 @@ async function submitFormData(event) {
     try {
         const formData = new FormData(event.target);
         const response = await fetch(event.target.action, {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${token}`,
-            },
+            method: event.target.method,
             body: formData,
         });
-
         const data = await response.json();
         console.log(data);
 
         if (response.ok) {
-            navigateTo(event.target.getRootNode().host.redirectUrl);
+            console.log("Login successful, redirecting to test page: ",
+                event.target.getRootNode().host.redirectUrl);
+            navigateTo("/test");
         }
     } catch (error) {
         console.error(error);
@@ -86,11 +84,12 @@ class Login extends HTMLElement {
             </style>
             <h1>Login Page</h1>
 
-            <form action="/login" method="POST" onsubmit="this.getRootNode().host.submitFormData(event)">
+            <form id="loginForm" action="/login" method="POST">
                 <input type="text" name="username" placeholder="Username" required />
                 <input type="submit" value="Login" />
             </form>
             `;
+        this.shadowRoot.getElementById("loginForm").addEventListener("submit", submitFormData);
     }
 
     /**

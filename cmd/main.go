@@ -11,6 +11,9 @@ func main() {
 	http.HandleFunc("/static/", handlers.Serve)
 
 	http.HandleFunc("/", handlers.Home)
+	http.HandleFunc("/login", handlers.Login)
+	http.HandleFunc("/test", handlers.Test)
+	http.HandleFunc("/sumit-test", handlers.SubmitTest)
 
 	handler := middleware.LoggingMiddleware(http.DefaultServeMux)
 

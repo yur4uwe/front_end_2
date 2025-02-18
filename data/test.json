@@ -19,7 +19,7 @@
             "Green",
             "Yellow"
         ],
-        "answer": "Red"
+        "answer": "1"
     },
     {
         "question": "How many rectangles are in the image?",
@@ -41,7 +41,7 @@
             "Ellipse",
             "Triangle"
         ],
-        "answer": "Ellipse"
+        "answer": "3"
     },
     {
         "question": "How many lines are in the image?",

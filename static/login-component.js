@@ -22,6 +22,7 @@ async function submitFormData(event) {
                 .then((data) => {
                     localStorage.setItem("testData", JSON.stringify(data));
                     localStorage.setItem("answers", JSON.stringify(Array(data.length).fill(null)));
+                    localStorage.setItem("username", formData.get("username"));
                 })
             );
     } catch (error) {
@@ -29,6 +30,10 @@ async function submitFormData(event) {
     }
 }
 
+function navigateTo(path) {
+    window.history.pushState({}, "", path);
+    window.dispatchEvent(new Event("popstate"));
+}
 
 class Login extends HTMLElement {
     static get observedAttributes() {
@@ -80,10 +85,15 @@ class Login extends HTMLElement {
     }
 
     /**
-     * @param {string} name - Name of the attribute
-     * @param {string} oldValue - Old value of the attribute
-     * @param {string} newValue - New value of the attribute
-     */
+         * @param {string} name - Name of the attribute
+         * @param {string} oldValue - Old value of the attribute
+         * @param {string} newValue - New value of the attribute
+         */
+    /**
+         * @param {string} name - Name of the attribute
+         * @param {string} oldValue - Old value of the attribute
+         * @param {string} newValue - New value of the attribute
+         */
     attributeChangedCallback(name, oldValue, newValue) {
         if (name === 'redirect-url') {
             this.redirectUrl = newValue;

@@ -16,14 +16,14 @@ type User struct {
 func getUsers() ([]User, error) {
 	file, err := os.ReadFile("../data/user_data.json")
 	if err != nil {
-		fmt.Println("Error opening file")
+		fmt.Println("Error opening file:", err)
 		return nil, err
 	}
 
 	var users []User
 	err = json.Unmarshal(file, &users)
 	if err != nil {
-		fmt.Println("Error unmarshalling json")
+		fmt.Println("Error unmarshalling json:", err)
 		return nil, err
 	}
 
@@ -47,6 +47,7 @@ func ModifyUser(user User, score int, time time.Time) User {
 func SaveUser(user User) error {
 	users, err := getUsers()
 	if err != nil {
+		fmt.Println("Error getting users:", err)
 		return err
 	}
 
@@ -54,12 +55,13 @@ func SaveUser(user User) error {
 
 	marshalled, err := json.Marshal(users)
 	if err != nil {
+		fmt.Println("Error marshalling users:", err)
 		return err
 	}
 
 	err = os.WriteFile("../data/user_data.json", marshalled, 0644)
 	if err != nil {
-		fmt.Println("Error writing to file")
+		fmt.Println("Error writing to file:", err)
 		return err
 	}
 

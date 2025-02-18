@@ -34,14 +34,14 @@ func getTestData() ([]Question, error) {
 	// Open the file
 	file, err := os.ReadFile(test_location)
 	if err != nil {
-		fmt.Println("Error opening file")
+		fmt.Println("Error opening file:", err)
 		return nil, err
 	}
 
 	var questions []Question
 	err = json.Unmarshal(file, &questions)
 	if err != nil {
-		fmt.Println("Error unmarshalling json")
+		fmt.Println("Error unmarshalling json:", err)
 		return nil, err
 	}
 
@@ -51,6 +51,7 @@ func getTestData() ([]Question, error) {
 func GetTestDataForUser() ([]AnswerLessQuestion, error) {
 	test_data, err := getTestData()
 	if err != nil {
+		fmt.Println("Error getting test data:", err)
 		return nil, err
 	}
 
@@ -64,4 +65,27 @@ func GetTestDataForUser() ([]AnswerLessQuestion, error) {
 
 func GetTestDataForCheck() ([]Question, error) {
 	return getTestData()
+}
+
+func CheckScore(answers []string) (int, error) {
+	test_data, err := getTestData()
+	if err != nil {
+		fmt.Println("Error getting test data:", err)
+		return 0, err
+	}
+
+	if len(answers) != len(test_data) {
+		err := fmt.Errorf("invalid number of answers")
+		fmt.Println("Error:", err)
+		return 0, err
+	}
+
+	score := 0
+	for i, q := range test_data {
+		if q.Answer == answers[i] {
+			score++
+		}
+	}
+
+	return score, nil
 }

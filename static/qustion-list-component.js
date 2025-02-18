@@ -1,3 +1,8 @@
+function navigateTo(path) {
+    window.history.pushState({}, "", path);
+    window.dispatchEvent(new Event("popstate"));
+}
+
 class QuestionList extends HTMLElement {
     static get observedAttributes() {
         return ['questions'];
@@ -24,13 +29,20 @@ class QuestionList extends HTMLElement {
                 .active {
                     background-color: var(--question-list-active-button-color);
                 }
+                #next-prev-container, #links-container {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
             </style>
             <div id="links-container"></div>
-            <div id="next-prev-container">
-                <button id="prevButton">Prev</button>
-                <button id="nextButton">Next</button>
-            </div>
             <slot></slot> <!-- Define a slot for children -->
+            <div id="next-prev-container">
+                <button id="prevButton"><</button>
+                <button id="endTestButton">end test</button>
+                <button id="nextButton">></button>
+            </div>
+            
         `;
 
         this.activeButton = 0;
@@ -40,49 +52,72 @@ class QuestionList extends HTMLElement {
             const questionButton = document.createElement("button");
             questionButton.id = `btn-${i}`;
             questionButton.addEventListener("click", () => {
-                this.shadowRoot.querySelectorAll("button").forEach((button) => button.classList.remove("active"));
-                questionButton.classList.add("active");
+                this.highlightButton(i);
+                this.activeButton = i;
                 this.dispatchEvent(new CustomEvent("questionSelected", {
-                    detail: { index: i, move: 0 },
+                    detail: { index: i },
                     bubbles: true,
                     composed: true
                 }));
             });
             questionButton.textContent = `${i + 1}`;
-            this.shadowRoot.appendChild(questionButton);
+            this.shadowRoot.getElementById("links-container").appendChild(questionButton);
         }
 
         this.shadowRoot.getElementById("prevButton").addEventListener("click", () => {
-            if (this.activeButton < 0) {
-                this.activeButton = this.questionAmount - 1;
-            } else if (this.activeButton >= this.questionAmount) {
-                this.activeButton = 0;
-            }
-
-            this.shadowRoot.querySelectorAll("button").forEach((button) => {
-                const btn_id = button.id.split("-")[1];
-                if (btn_id == this.activeButton) {
-                    button.classList.add("active");
-                } else {
-                    button.classList.remove("active");
-                }
-            });
+            const new_index = this.moveActiveButton(-1);
 
             this.dispatchEvent(new CustomEvent("questionSelected", {
-                detail: { index: -1, move: -1 },
+                detail: { index: new_index },
                 bubbles: true,
                 composed: true
             }));
         });
 
         this.shadowRoot.getElementById("nextButton").addEventListener("click", () => {
-            this.classList.add("active");
+            const new_index = this.moveActiveButton(1);
+
             this.dispatchEvent(new CustomEvent("questionSelected", {
-                detail: { index: -1, move: 1 },
+                detail: { index: new_index },
                 bubbles: true,
                 composed: true
             }));
         });
+
+        this.shadowRoot.getElementById("endTestButton").addEventListener("click", async () => {
+            const formData = new FormData();
+            formData.append("username", localStorage.getItem("username"));
+            formData.append("score", JSON.stringify(localStorage.getItem("answers")));
+            formData.append("time", new Date().toISOString());
+
+            const response = await fetch("/submit-test", {
+                method: "POST",
+                body: formData
+            }).then((res) => res.json());
+
+            console.log(response);
+
+            navigateTo("/results");
+        });
+    }
+
+    highlightButton(index) {
+        this.shadowRoot.querySelectorAll("button").forEach((button) => button.classList.remove("active"));
+        this.shadowRoot.getElementById(`btn-${index}`).classList.add("active");
+    }
+
+    moveActiveButton(move) {
+        this.activeButton += move;
+
+        if (this.activeButton < 0) {
+            this.activeButton = this.questionAmount - 1;
+        } else if (this.activeButton >= this.questionAmount) {
+            this.activeButton = 0;
+        }
+
+        this.highlightButton(this.activeButton);
+
+        return this.activeButton;
     }
 
     attributeChangedCallback(name, oldValue, newValue) {

@@ -24,3 +24,27 @@ func Serve(w http.ResponseWriter, r *http.Request) {
 
 	http.ServeFile(w, r, "../static/"+file_to_serve)
 }
+
+func NotFound(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, "/404", http.StatusNotFound)
+}
+
+func Login(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		w.Write([]byte("{Method not allowed}"))
+		return
+	}
+
+	r.ParseForm()
+	username := r.FormValue("username")
+
+	if username == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("{Username not provided}"))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("{Welcome " + username + "}"))
+}

@@ -12,9 +12,7 @@ func main() {
 
 	http.HandleFunc("/", handlers.Home)
 
-	handler := middleware.ContentTypeMiddleware(
-		middleware.LoggingMiddleware(http.DefaultServeMux),
-	)
+	handler := middleware.LoggingMiddleware(http.DefaultServeMux)
 
 	fmt.Println("Server is listening at :8080")
 	http.ListenAndServe(":8080", handler)

@@ -5,6 +5,8 @@ document.addEventListener("DOMContentLoaded", () => {
         main.innerHTML = ""; // Clear existing content
 
         if (path === "/login") {
+            localStorage.clear();
+            localStorage.removeItem("answers");
             const loginElement = document.createElement("login-component");
             loginElement.setAttribute("redirect-url", "/login");
             main.appendChild(loginElement);

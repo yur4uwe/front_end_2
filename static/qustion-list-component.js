@@ -3,6 +3,10 @@ function navigateTo(path) {
     window.dispatchEvent(new Event("popstate"));
 }
 
+/**
+ * @typedef {{state: {message: string}, scores: {score: number, time: string}[]}} Response
+ */
+
 class QuestionList extends HTMLElement {
     static get observedAttributes() {
         return ['questions'];
@@ -18,7 +22,7 @@ class QuestionList extends HTMLElement {
                     margin: 10px;
                     width: 50px;
                     height: 50px;
-                    border-radius: 5px;
+                    border-radius: 40%;
                     border: none;
                     background-color: var(--question-list-button-color);
                     text-align: center;
@@ -34,6 +38,14 @@ class QuestionList extends HTMLElement {
                     justify-content: space-between;
                     align-items: center;
                 }
+                #endTestButton {
+                    width: 100px;
+                    border-radius: 5px;
+                    background-color: var(--end-test);
+                }
+                    .active {
+                        color: var(--question-list-active-button-color-text);
+                    }
             </style>
             <div id="links-container"></div>
             <slot></slot> <!-- Define a slot for children -->
@@ -47,6 +59,7 @@ class QuestionList extends HTMLElement {
 
         this.activeButton = 0;
         this.questionAmount = this.getAttribute("questions");
+
 
         for (let i = 0; i < this.getAttribute("questions"); i++) {
             const questionButton = document.createElement("button");
@@ -90,6 +103,9 @@ class QuestionList extends HTMLElement {
             formData.append("score", JSON.stringify(localStorage.getItem("answers")));
             formData.append("time", new Date().toISOString());
 
+            /**
+             * @type {Response} response
+             */
             const response = await fetch("/submit-test", {
                 method: "POST",
                 body: formData
@@ -97,8 +113,17 @@ class QuestionList extends HTMLElement {
 
             console.log(response);
 
+            if (!response.success) {
+                return;
+            }
+
+            localStorage.removeItem("answers");
+            localStorage.setItem("results", response.scores);
+
             navigateTo("/results");
         });
+
+        this.highlightButton(this.activeButton);
     }
 
     highlightButton(index) {

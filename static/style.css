@@ -1,5 +1,5 @@
 :root {
-    --main-bg-color: lightgray;
+    --main-bg-color: white;
     --main-text-color: black;
     --button-bg-color: green;
     --button-text-color: white;
@@ -9,4 +9,16 @@
     --question-list-button-color: lightgray;
     --question-list-button-hover-color: rgb(66, 66, 66);
     --question-list-active-button-color: rgb(92, 92, 92);
+    --question-list-active-button-color-text: white;
+    --end-test: rgb(252, 87, 87);
+    font-family: Arial, sans-serif;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    background-color: var(--main-bg-color);
+    color: var(--main-text-color);
 }

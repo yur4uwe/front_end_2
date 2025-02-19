@@ -13,9 +13,29 @@ class Home extends HTMLElement {
         this.attachShadow({ mode: "open" });
         this.shadowRoot.innerHTML = `
             <style>
-                h1 {
-                    color: var(--main-text-color);
-                }
+            :host {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-direction: column;
+                width: calc(100% - 40px);
+                padding: 10px;
+                background-color: var(--main-bg-color);
+                border-radius: 5px;
+                margin: 10px;
+            }
+            h1 {
+                color: var(--main-text-color);
+            }
+            #loginButton {
+                padding: 10px;
+                margin: 10px;
+                border-radius: 5px;
+                border: none;
+                background-color: var(--button-bg-color);
+                text-align: center;
+                color: var(--button-text-color);
+            }
             </style>
             <h1>Home Page</h1>
             <button id="loginButton">Login</button>

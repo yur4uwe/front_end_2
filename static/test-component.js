@@ -2,8 +2,8 @@
  * @param {string[]} options - Options for the question
  * @returns {string} HTML string of the options
  */
-function parseQuestionOptions(options) {
-    return options.map((option, index) => `<div><input type="radio" name="option" value="${index}">${option}</div>`).join("");
+function parseQuestionOptions(options, selectedValue) {
+    return options.map((option, index) => `<div><input type="radio" name="option" value="${index}" ${selectedValue === index ? "checked" : ""}>${option}</div>`).join("");
 }
 
 class Test extends HTMLElement {
@@ -81,9 +81,11 @@ class Test extends HTMLElement {
 
         const questionElement = document.createElement("question-element");
 
+        const answers = JSON.parse(localStorage.getItem("answers")) || Array(questionLength).fill(null);
+
         questionElement.innerHTML = `<div id="question">${question.question}</div>
             ${question.svg}
-            <div id="options">${parseQuestionOptions(question.options)}</div>`;
+            <div id="options">${parseQuestionOptions(question.options, answers[index] - 1)}</div>`;
 
         testContainer.appendChild(questionElement);
 

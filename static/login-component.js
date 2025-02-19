@@ -15,16 +15,13 @@ async function submitFormData(event) {
             return alert(data.message);
         }
 
-        navigateTo("/test");
+        const testResponse = await fetch("/test");
+        const testData = await testResponse.json();
+        localStorage.setItem("testData", JSON.stringify(testData));
+        localStorage.setItem("answers", JSON.stringify(Array(testData.length).fill(null)));
+        localStorage.setItem("username", formData.get("username"));
 
-        await fetch("/test")
-            .then((res) => res.json()
-                .then((data) => {
-                    localStorage.setItem("testData", JSON.stringify(data));
-                    localStorage.setItem("answers", JSON.stringify(Array(data.length).fill(null)));
-                    localStorage.setItem("username", formData.get("username"));
-                })
-            );
+        navigateTo("/test");
     } catch (error) {
         console.error(error);
     }
@@ -84,11 +81,6 @@ class Login extends HTMLElement {
         this.shadowRoot.getElementById("loginForm").addEventListener("submit", submitFormData);
     }
 
-    /**
-         * @param {string} name - Name of the attribute
-         * @param {string} oldValue - Old value of the attribute
-         * @param {string} newValue - New value of the attribute
-         */
     /**
          * @param {string} name - Name of the attribute
          * @param {string} oldValue - Old value of the attribute

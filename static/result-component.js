@@ -129,15 +129,18 @@ class Result extends HTMLElement {
         sortedArray.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
 
         for (const result of sortedArray) {
+            // Create a result-display element to display the result of test
             const resultDisplay = document.createElement("result-display");
+            // Set values of the result-display element
             resultDisplay.score = result.score;
             resultDisplay.time = result.time;
             resultDisplay.atempt = resultsArray.findIndex((r) => r.time === result.time && r.score === result.score) + 1;
+            // Append the result-display element to the shadow root
             this.shadowRoot.appendChild(resultDisplay);
         }
 
         this.shadowRoot.getElementById("backButton").addEventListener("click", () => {
-            window.location.href = "/";
+            navigateTo("/");
         });
     }
 }

@@ -19,6 +19,7 @@ class Home extends HTMLElement {
                 justify-content: center;
                 flex-direction: column;
                 width: calc(100% - 40px);
+                height: calc(100% - 40px);
                 padding: 10px;
                 background-color: var(--main-bg-color);
                 border-radius: 5px;

@@ -22,6 +22,11 @@ class Test extends HTMLElement {
                     display: flex;
                     align-items: center;
                     flex-direction: column;
+                    justify-content: center;
+                    width: calc(100% - 40px);
+                    height: calc(100% - 40px);
+                    padding: 10px;
+
                 }
                 h1 {
                     color: var(--main-text-color);
@@ -76,17 +81,23 @@ class Test extends HTMLElement {
      * @param {number} questionLength
      */
     renderQuestion(index, question, questionLength) {
+        // Get the container to render the question
         const testContainer = this.shadowRoot.getElementById("testContainer");
+        // Clear the container
         testContainer.innerHTML = "";
-
+        // Create a new question element
         const questionElement = document.createElement("question-element");
-
+        // Get the user answers from localStorage or create an array of null values
         const answers = JSON.parse(localStorage.getItem("answers")) || Array(questionLength).fill(null);
 
-        questionElement.innerHTML = `<div id="question">${question.question}</div>
+        // Render the question element
+        questionElement.innerHTML =
+            // Render the question itself, svg image and options for the question
+            `<div id="question">${question.question}</div>
             ${question.svg}
             <div id="options">${parseQuestionOptions(question.options, answers[index] - 1)}</div>`;
 
+        // Append new question element to the container
         testContainer.appendChild(questionElement);
 
         // Add event listener to save selected value to localStorage
